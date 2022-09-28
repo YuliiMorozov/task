@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}
+All readings electricity meters
+{% endblock %}
+
+
+{% block content %}
+<h1>All indications and the amount payable for electricity:</h1>
+{% for item in electricity %}
+    <table>
+        <tr>
+            <th></th>
+            <th>Indications</th>
+            <th>To pay</th>           
+        </tr>
+    
+
+    
+        <tr>
+            <th>Electricity:</th>
+            <td>{{ item.count_electricity }}</td>
+            <td>{{ item.count_electricity * 1.44 }}</td>            
+        </tr>        
+    </table>
+
+{% endfor %}
+
+
+{% endblock %}

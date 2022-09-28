@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}
+All readings
+{% endblock %}
+
+
+{% block content %}
+<h1>All payments</h1>
+<table>
+    <tr>
+        <td><a href="/payment/water" class="btn btn-outline-secondary btn-sm">Water readings of all residents</a></td> 
+        <td><a href="/payment/gas" class="btn btn-outline-secondary btn-sm">Gas meter readings for all residents</a></td>
+        <td><a href="/payment/electricity" class="btn btn-outline-secondary btn-sm">Electricity meter readings for all residents</a></td>
+    </tr>        
+</table>
+<p>Water: 17,808 грн./куб.</p>
+<p>Gas: 7,9569 грн./куб.</p>
+<p>Electricity: 1,44 грн. за 1 кВт⋅час</p>
+
+    
+
+    <table>
+        <tr>
+            <th></th>
+            <th>Indications</th>
+            <th>To pay</th>           
+        </tr>
+        <tr>
+            {% for item in waterinvoice %}
+            <th>Water:</th>
+            <td>{{ item.count_water }}</td>
+            <td>{{ item.count_water * 17.808 }}</td>
+            {% endfor %}            
+        </tr>
+        <tr>
+            {% for item in gasinvoice %}
+            <th>Gas:</th>
+            <td>{{ item.count_gas }}</td>
+            <td>{{ item.count_gas * 7.9569 }}</td>
+            {% endfor %}               
+        </tr>
+        <tr>
+            {% for item in electricityinvoice %}
+            <th>Electricity:</th>
+            <td>{{ item.count_electricity }}</td>
+            <td>{{ item.count_electricity * 1.44 }}</td>
+            {% endfor %}              
+        </tr>      
+    </table>
+
+
+
+{% endblock %}

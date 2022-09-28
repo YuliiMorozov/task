@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-iYQeCzEYFbKjA/T2uDLTpkwGzCiq6soy8tYaI1GyVh/UjpbCx/TYkiZhlZB6+fzT" crossorigin="anonymous">    
+    <title>
+        {% block title %}
+        
+        {% endblock %}
+    </title>
+</head>
+<body>
+    <a class="btn btn-dark" href="/">Home</a>
+    
+    <a class="btn btn-dark" href="/create_payment">Submit meter readings</a>
+    
+    <a class="btn btn-dark" href="/payment">All bills</a>
+    
+    <a class="btn btn-dark" href="/about">About</a>
+    {% block content %}
+
+    {% endblock %}
+</body>
+</html>

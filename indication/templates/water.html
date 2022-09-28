@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block title %}
+All indications of water
+{% endblock %}
+
+
+{% block content %}
+<h1>All indications and amount payable for water:</h1>
+{% for item in water %}
+    <table>
+        <tr>
+            <th></th>
+            <th>Indications</th>
+            <th>To pay</th>           
+        </tr>    
+        <tr>
+            <th>Water:</th>
+            <td>{{ item.count_water }}</td>
+            <td>{{ item.count_water * 17.808 }}</td>            
+        </tr>        
+    </table>
+
+{% endfor %}
+
+
+{% endblock %}

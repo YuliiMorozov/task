@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}
+All gas readings
+{% endblock %}
+
+
+{% block content %}
+<h1>All indications and amount payable for gas:</h1>
+{% for item in gas %}
+    <table>
+        <tr>
+            <th></th>
+            <th>Indications</th>
+            <th>To pay</th>           
+        </tr>
+    
+
+    
+        <tr>
+            <th>Gas:</th>
+            <td>{{ item.count_gas }}</td>
+            <td>{{ item.count_gas * 7.9569 }}</td>            
+        </tr>        
+    </table>
+
+{% endfor %}
+
+
+{% endblock %}

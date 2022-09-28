@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}
+Submit meter readings
+{% endblock %}
+
+
+{% block content %}
+<h2>Submit meter readings</h2>
+
+<form action="{{ url_for('create_payment') }}" method="POST">
+    {{ template_form.hidden_tag() }}
+    {{ template_form.house.label }}<br>
+    {{ template_form.house() }}<br>
+    <br>
+    {{ template_form.hidden_tag() }}
+    {{ template_form.flat.label }}<br>
+    {{ template_form.flat() }}<br>
+    <br>
+    {{ template_form.hidden_tag() }}
+    {{ template_form.water.label }}<br>
+    {{ template_form.water() }}<br>
+    <br>
+    {{ template_form.hidden_tag() }}
+    {{ template_form.gas.label }}<br>
+    {{ template_form.gas() }}<br>
+    <br>
+    {{ template_form.hidden_tag() }}
+    {{ template_form.electricity.label }}<br>
+    {{ template_form.electricity() }}<br>
+    <br>
+    {{ template_form.submit() }}
+</form>
+
+
+
+
+
+{% endblock %}

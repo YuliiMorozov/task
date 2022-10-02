@@ -1,3 +1,4 @@
+# task
 Hi friend!
 
 This is a task with model relationships and displaying them on the website.
@@ -6,9 +7,10 @@ This is a task with model relationships and displaying them on the website.
 To run the application, install packages from requirements.txt
 
 
-Run the application with 
-$ python manage.py 
-or 
-$ python3 manage.py
+Run the application with: 
 
-# task
+$ python manage.py 
+
+or 
+
+$ python3 manage.py

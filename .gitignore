@@ -1,4 +1,7 @@
-komentarii.py
+trash.py
 static/
 venv/
 __pycache__/
+db.sqlite3
+mybase.db
+app.py

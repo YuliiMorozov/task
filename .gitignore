@@ -5,3 +5,10 @@ __pycache__/
 db.sqlite3
 mybase.db
 app.py
+indication/mybase.db
+indication/logic.py
+song_library.db
+utils.py
+Dockerfile
+Docker-compose.yml
+db.db

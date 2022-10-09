@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block title %}
+Login
+{% endblock %}
+
+
+{% block content %}
+<h1 style="color:red">Sign In</h1>
+    <p>New User? <a href="{{ url_for('registration') }}">Click to Register!</a></p>
+    <form action="" method="post">
+        {{ login_form.hidden_tag() }}
+        <p>
+            {{ login_form.email.label }}<br>
+            {{ login_form.email(size=32) }}<br>
+            {% for error in login_form.email.errors %}
+            <span style="color: red;">[{{ error }}]</span>
+            {% endfor %}
+        </p>
+        <p>
+            {{ login_form.password.label }}<br>
+            {{ login_form.password(size=32) }}<br>
+            {% for error in login_form.password.errors %}
+            <span style="color: red;">[{{ error }}]</span>
+            {% endfor %}
+        </p>
+        <p>{{ login_form.remember() }} {{ login_form.remember.label }}</p>
+        <p>{{ login_form.submit() }}</p>
+    </form>
+
+{% endblock %}

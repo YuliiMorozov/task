@@ -1,7 +1,7 @@
 from flask import render_template, request, redirect
 from indication import db
-from indication.models import ElectricityInvoice, GasInvoice, House, Flat, WaterInvoice, Invoice
-from indication.forms import FormGeneral
+from indication.models import *
+from indication.forms import *
 
 def create_data():
 
@@ -14,17 +14,26 @@ def create_data():
         count_gas = request.form['gas']
         count_electricity = request.form['electricity']
 
-        house = House(house_number=house_number)
-        flat = Flat(flat_number=flat_number, house=house)        
+         
+        house = House.query.filter_by(house_number=house_number).first()    
+        if house is None:
+            house = House(house_number=house_number)        
+            db.session.add(house)
+            
+        flat = Flat.query.filter_by(flat_number=flat_number, house=house).first()    
+        if flat is None:
+            flat = Flat(flat_number=flat_number, house=house)        
+            db.session.add(flat)
+
+        # flat = Flat(flat_number=flat_number, house=house) 
+
         water_invoice = WaterInvoice(count_water=count_water)
         gas_invoice = GasInvoice(count_gas=count_gas)
         electricity_invoice = ElectricityInvoice(count_electricity=count_electricity)
 
         invoice = Invoice(flat=flat, water_invoice=water_invoice, gas_invoice=gas_invoice, electricity_invoice=electricity_invoice)
 
-        try:
-            db.session.add(house)
-            db.session.add(flat)            
+        try:            
             db.session.add(water_invoice)
             db.session.add(gas_invoice)
             db.session.add(electricity_invoice)

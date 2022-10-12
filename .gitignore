@@ -1,5 +1,4 @@
 trash.py
-static/
 venv/
 __pycache__/
 db.sqlite3
@@ -12,3 +11,6 @@ utils.py
 Dockerfile
 Docker-compose.yml
 db.db
+.vscode/
+models.py
+launch.json

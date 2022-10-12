@@ -25,13 +25,16 @@ def create_data():
             flat = Flat(flat_number=flat_number, house=house)        
             db.session.add(flat)
 
-        # flat = Flat(flat_number=flat_number, house=house) 
+        invoice = Invoice(flat=flat)
+        water_invoice = WaterInvoice(count_water=count_water, invoice=invoice, flat=flat)
+        gas_invoice = GasInvoice(count_gas=count_gas, invoice=invoice, flat=flat)
+        electricity_invoice = ElectricityInvoice(count_electricity=count_electricity, invoice=invoice, flat=flat)
 
-        water_invoice = WaterInvoice(count_water=count_water)
-        gas_invoice = GasInvoice(count_gas=count_gas)
-        electricity_invoice = ElectricityInvoice(count_electricity=count_electricity)
-
-        invoice = Invoice(flat=flat, water_invoice=water_invoice, gas_invoice=gas_invoice, electricity_invoice=electricity_invoice)
+        
+        # water_invoice = WaterInvoice(count_water=count_water)
+        # gas_invoice = GasInvoice(count_gas=count_gas)
+        # electricity_invoice = ElectricityInvoice(count_electricity=count_electricity)
+        # invoice = Invoice(flat=flat, water_invoice=water_invoice, gas_invoice=gas_invoice, electricity_invoice=electricity_invoice)
 
         try:            
             db.session.add(water_invoice)
@@ -45,18 +48,26 @@ def create_data():
     else:
         return render_template("create_payment.html",
                                 template_form=form_general)
-                                
+
 
 def pay_information():
-    waterinvoice = WaterInvoice.query.all()
-    gasinvoice = GasInvoice.query.all()
-    electricityinvoice = ElectricityInvoice.query.all()
-    houseid = Flat.query.all() 
+    houses = House.query.all()
+    flats = Flat.query.all()
+    invoices = Invoice.query.all()
+    waterinvoices = WaterInvoice.query.all()
+    gasinvoices = GasInvoice.query.all()
+    electricityinvoices = ElectricityInvoice.query.all()
+    users = User.query.all()
     return render_template("payment.html",
-                            waterinvoice=waterinvoice,
-                            gasinvoice=gasinvoice,
-                            electricityinvoice=electricityinvoice,
-                            houseid=houseid)
+                            houses=houses,
+                            flats=flats,
+                            invoices=invoices,
+                            waterinvoices=waterinvoices,
+                            gasinvoices=gasinvoices,
+                            electricityinvoices=electricityinvoices,
+                            users=users)
+
+
 
 def water_information():
     water = WaterInvoice.query.all()
@@ -72,3 +83,15 @@ def electricity_information():
     electricity = ElectricityInvoice.query.all()
     return render_template("electricity.html",
                             electricity=electricity)
+
+def to_pay():
+    # sum = class.query.get()
+    api = Api(merchant_id=1396424,
+          secret_key='test')
+    checkout = Checkout(api=api)
+    data = {
+        "currency": "UAH",
+        "amount": str(100) + "00"
+    }
+    url = checkout.url(data).get('checkout_url')
+    return redirect(url)

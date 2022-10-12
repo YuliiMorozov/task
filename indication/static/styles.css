@@ -1,0 +1,24 @@
+body {
+    background: rgba(221, 216, 216, 0.747);
+}
+
+table {
+    width: 50%;
+    border: 3px solid;
+  }
+  
+  th {
+    background-color: #5d84be67;
+    padding: 2px;
+    text-align: center;
+    height: 70px;
+    border: 1px solid;
+    width: 200px;
+  }
+
+  td {
+    padding: 5px;
+    text-align: center;
+    border: 1px solid;
+    width: 200px;
+  }

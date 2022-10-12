@@ -14,41 +14,93 @@ All readings
         <td><a href="/payment/electricity" class="btn btn-outline-secondary btn-sm">Electricity meter readings for all residents</a></td>
     </tr>        
 </table>
-<p>Water: 17,808 грн./куб.</p>
-<p>Gas: 7,9569 грн./куб.</p>
-<p>Electricity: 1,44 грн. за 1 кВт⋅час</p>
+<p>Water: 17.808 грн./куб.</p>
+<p>Gas: 7.9569 грн./куб.</p>
+<p>Electricity: 1.44 грн. за 1 кВт⋅час</p>
 
-    
+<!-- {% for house in houses %} -->
+<!-- {% for flat in house.flats %} -->
+<!-- {% for water in flat.water_invoices %} -->
 
-    <table>
+<!-- Invoice for house #{{ house.house_number }} -->
+<!-- <table>      -->
+    <!-- <tr>
+        <th>House #{{ house.house_number }}</th>            
+        <th>Indications</th>
+        <th>To pay</th>
+        <th>Remit payment</th>
+    </tr>        
+    <tr>            
+        <th>Water:</th>
+        <td>{{ house.flats.water_invoices|sum(attribute='count_water') }}</td>
+        <td>{{ water.count_water }}</td>
+        <td>{{ (water.count_water * 17.80)|round(2) }}</td>
+        <td><a href="" class="btn btn-success">{{ (water.count_water * 17.80)|round(2) }}</a></td>            
+    </tr>
+     -->
+<!-- </table>
+{% endfor %}
+{% endfor %}
+{% endfor %} -->
+
+<table>
+    <tr>
+        <th colspan="2">User`s table:</th>
+    </tr>
+    {% for user in users %}
+    <tr>        
+        <td>{{ user.username }}</td>
+        <td>{{ user.joined_at }}</td>
+        
+    </tr>
+    {% endfor %}
+</table>
+
+
+<br>
+
+{% for house in houses %}
+{% for flat in house.flats %}
+{% for water in flat.water_invoices %}
+{% for gas in flat.gas_invoices %}
+{% for electricity in flat.electricity_invoices %}
+    <table>      
         <tr>
-            <th></th>
+            <th>House #{{ house.house_number }}, <p>apartment #{{ flat.flat_number }}</p></th>            
             <th>Indications</th>
-            <th>To pay</th>           
-        </tr>
-        <tr>
-            {% for item in waterinvoice %}
+            <th>To pay</th>
+            <th>Remit payment</th>
+        </tr>        
+        <tr>            
             <th>Water:</th>
-            <td>{{ item.count_water }}</td>
-            <td>{{ item.count_water * 17.808 }}</td>
-            {% endfor %}            
+            <td>{{ water.count_water }}</td>
+            <td>{{ (water.count_water * 17.80)|round(2) }}</td>
+            <td><a href="/payment/{{ (water.count_water * 17.80)|round(2) }}" class="btn btn-success">{{ (water.count_water * 17.80)|round(2) }}</a></td>            
         </tr>
-        <tr>
-            {% for item in gasinvoice %}
+        <tr>            
             <th>Gas:</th>
-            <td>{{ item.count_gas }}</td>
-            <td>{{ item.count_gas * 7.9569 }}</td>
-            {% endfor %}               
+            <td>{{ gas.count_gas }}</td>
+            <td>{{ (gas.count_gas * 7.95)|round(2) }}</td>            
+            <td><a href="/payment/{{ (gas.count_gas * 7.95)|round(2) }}" class="btn btn-success">{{ (gas.count_gas * 7.95)|round(2) }}</a></td>
         </tr>
-        <tr>
-            {% for item in electricityinvoice %}
+        <tr>            
             <th>Electricity:</th>
-            <td>{{ item.count_electricity }}</td>
-            <td>{{ item.count_electricity * 1.44 }}</td>
-            {% endfor %}              
-        </tr>      
+            <td>{{ electricity.count_electricity }}</td>
+            <td>{{ (electricity.count_electricity * 7.95)|round(2) }}</td>            
+            <td><a href="/payment/{{ (electricity.count_electricity * 7.95)|round(2) }}" class="btn btn-success">{{ (electricity.count_electricity * 7.95)|round(2) }}</a></td>
+        </tr>
+        <tr>            
+            <th>Total:</th>
+            <td colspan="2"></td>
+            <td><a href="/payment/{{ (water.count_water * 17.80 + gas.count_gas * 7.95 + electricity.count_electricity * 7.95)|round(2) }}" class="btn btn-success">{{ (water.count_water * 17.80 + gas.count_gas * 7.95 + electricity.count_electricity * 7.95)|round(2) }}</a></td>       
+        </tr>        
     </table>
-
+    <br>
+{% endfor %}
+{% endfor %}
+{% endfor %}
+{% endfor %}
+{% endfor %}
 
 
 {% endblock %}

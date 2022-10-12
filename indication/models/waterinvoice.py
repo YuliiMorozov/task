@@ -5,4 +5,8 @@ class WaterInvoice(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     count_water = db.Column(db.Float, unique=False)
 
-    invoices = db.relationship('Invoice', backref='water_invoice', lazy='dynamic')
+    water_invoices_id = db.Column(db.Integer, db.ForeignKey('invoice.id'))
+
+    # invoices = db.relationship('Invoice', backref='water_invoice', lazy='dynamic')
+    # new
+    flat_id = db.Column(db.Integer, db.ForeignKey('flat.id'))

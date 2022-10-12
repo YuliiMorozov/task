@@ -1,7 +1,8 @@
 from importlib.resources import read_text
 from flask import render_template, request, redirect, url_for, flash
 from indication import app, db, login_manager
-from indication.views import create_data, pay_information, water_information, gas_information, electricity_information
+from indication.models.waterinvoice import WaterInvoice
+from indication.views import create_data, pay_information, water_information, gas_information, electricity_information, to_pay
 from indication.forms.registration import RegistrationForm
 from indication.forms.login import LoginForm
 from indication.models.user import User
@@ -9,7 +10,7 @@ from indication.models.user import User
 from flask_login import login_required, login_user, current_user, logout_user
 from werkzeug.security import generate_password_hash, check_password_hash
 
-
+from cloudipsp import Api, Checkout
 
 
 @app.route('/')
@@ -22,9 +23,13 @@ def create_payment():
     return create_data()    
 
 @app.route('/payment')
-@login_required
+# @login_required
 def payment():
     return pay_information()
+
+@app.route('/payment/<float:sum>')
+def item_buy(sum):
+    return to_pay()
 
 @app.route('/payment/water')
 def water():

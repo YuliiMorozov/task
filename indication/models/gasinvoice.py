@@ -5,4 +5,7 @@ class GasInvoice(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     count_gas = db.Column(db.Float, unique=False)
 
-    invoices = db.relationship('Invoice', backref='gas_invoice', lazy='dynamic')
+    gas_invoices_id = db.Column(db.Integer, db.ForeignKey('invoice.id'))
+
+    # invoices = db.relationship('Invoice', backref='gas_invoice', lazy='dynamic')
+    flat_id = db.Column(db.Integer, db.ForeignKey('flat.id'))

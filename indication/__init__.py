@@ -1,6 +1,6 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
-from flask_login import LoginManager
+# from flask_login import LoginManager
 from indication.forms import forms, registration
 # from indication.model import models
 
@@ -13,7 +13,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
 # create login manager
-login_manager = LoginManager(app)
+# login_manager = LoginManager()
 # login_manager.init_app(app)
 
 from indication import urls

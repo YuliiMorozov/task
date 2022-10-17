@@ -1,33 +1,111 @@
 from importlib.resources import read_text
 from flask import render_template, request, redirect, url_for, flash
-from indication import app, db, login_manager
+from indication import app, db
 from indication.models.waterinvoice import WaterInvoice
 from indication.views import create_data, pay_information, water_information, gas_information, electricity_information, to_pay
 from indication.forms.registration import RegistrationForm
 from indication.forms.login import LoginForm
-from indication.models.user import User
+from indication.models.user import *
 
-from flask_login import login_required, login_user, current_user, logout_user
+from flask_login import LoginManager, login_required, login_user, current_user, logout_user
 from werkzeug.security import generate_password_hash, check_password_hash
 
-from cloudipsp import Api, Checkout
+# create login manager
+login_manager = LoginManager()
+login_manager.init_app(app)
+
+@app.route('/registration', methods=["GET", "POST"])
+def registration():
+    registration_form = RegistrationForm()
+    if request.method == "POST":
+
+        username = request.form['username']
+        email = request.form['email']
+                 
+        user = User.query.filter_by(username=username, email=email).first()    
+        if user is None:
+            user = User(username=username, email=email)   
+            user.set_password(registration_form.password.data)     
+            db.session.add(user)
+        try:            
+            db.session.commit()
+            return redirect('/registration')
+        except:
+            return "Error! Make sure the forms are filled out correctly."
+    else:
+        return render_template("registration.html",
+                                registration_form=registration_form)
+
+
+
+
+    # if registration_form.validate_on_submit():
+    #     username = request.form['username']
+    #     email = request.form['email']
+    #     user = User.query.filter_by(username=username, email=email).first()
+    #     if user is None:
+    #         user = User(username=registration_form.username.data, email=registration_form.email.data)
+    #         user.set_password(registration_form.password.data)
+    #         db.session.add(user)
+    #         db.session.commit()
+    # return render_template('registration.html', registration_form=registration_form)
+
+
+
+# user loader
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(user_id)
 
 
 @app.route('/')
+@app.route('/login', methods=['GET','POST'])
+def login():
+    login_form = LoginForm()
+    if login_form.validate_on_submit():
+
+        user = User.query.filter_by(email=login_form.email.data).first()
+
+        if user and user.check_password(login_form.password.data):
+
+            login_user(user, remember=login_form.remember.data)
+            next_page = request.args.get('next')
+            return redirect(next_page) if next_page else redirect(url_for('home'))
+        else:
+            return redirect(url_for('login'))
+    return render_template('login.html', login_form=login_form)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# @app.route('/')
 @app.route('/home')
+@login_required
 def home():
     return render_template("index.html")
 
 @app.route('/create_payment', methods=["GET", "POST"])
+@login_required
 def create_payment():
     return create_data()    
 
 @app.route('/payment')
-# @login_required
+@login_required
 def payment():
     return pay_information()
 
 @app.route('/payment/<float:sum>')
+@login_required
 def item_buy(sum):
     return to_pay()
 
@@ -47,38 +125,10 @@ def electricity():
 def about():
     return render_template("about.html")
 
-
-
-# user loader
-@login_manager.user_loader
-def load_user(user_id):
-    return User.query.get(user_id)
-
-@app.route('/registration', methods=["GET", "POST"])
-def registration():
-    registration_form = RegistrationForm()
-    if registration_form.validate_on_submit():
-        user = User(username=registration_form.username.data, email=registration_form.email.data)
-        user.set_password(registration_form.password.data)
-        db.session.add(user)
-        db.session.commit()
-    return render_template('registration.html', registration_form=registration_form)
-
-@app.route('/login', methods=['GET','POST'])
-def login():
-  login_form = LoginForm()
-  if login_form.validate_on_submit():
-
-    user = User.query.filter_by(email=login_form.email.data).first()
-
-    if user and user.check_password(login_form.password.data):
-
-      login_user(user, remember=login_form.remember.data)
-      next_page = request.args.get('next')
-      return redirect(next_page) if next_page else redirect(url_for('home', _external=True, _scheme='https'))
-    else:
-      return redirect(url_for('login', _external=True, _scheme='https'))
-  return render_template('login.html', login_form=login_form)
+# a decorator here to handle unauthorized users:
+@login_manager.unauthorized_handler
+def unauthorized():
+    return redirect(url_for('login'))
 
 
 
@@ -159,12 +209,3 @@ def login():
 #         else:
 #             return redirect(url_for('login', _external=True, _scheme='https'))
 #     return render_template('login.html', login_form=login_form)
-
-
-
-
-
-
-
-
-

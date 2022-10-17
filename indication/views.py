@@ -2,6 +2,10 @@ from flask import render_template, request, redirect
 from indication import db
 from indication.models import *
 from indication.forms import *
+from cloudipsp import Api, Checkout
+
+# def func_for_class()
+
 
 def create_data():
 

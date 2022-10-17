@@ -99,3 +99,7 @@ def to_pay():
     }
     url = checkout.url(data).get('checkout_url')
     return redirect(url)
+
+
+
+    

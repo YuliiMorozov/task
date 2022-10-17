@@ -1,10 +1,8 @@
 from importlib.resources import read_text
 from flask import render_template, request, redirect, url_for, flash
 from indication import app, db
-from indication.models.waterinvoice import WaterInvoice
-from indication.views import create_data, pay_information, water_information, gas_information, electricity_information, to_pay
-from indication.forms.registration import RegistrationForm
-from indication.forms.login import LoginForm
+from .controllers import create_data, pay_information, water_information, gas_information, electricity_information, to_pay
+from .forms import LoginForm, RegistrationForm
 from indication.models.user import *
 
 from flask_login import LoginManager, login_required, login_user, current_user, logout_user

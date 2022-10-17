@@ -1,8 +1,7 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 # from flask_login import LoginManager
-from indication.forms import forms, registration
-# from indication.model import models
+
 
 app = Flask(__name__)
 

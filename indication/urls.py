@@ -27,7 +27,7 @@ def registration():
             db.session.add(user)
         try:            
             db.session.commit()
-            return redirect('/registration')
+            return redirect('/login')
         except:
             return "Error! Make sure the forms are filled out correctly."
     else:
@@ -56,7 +56,7 @@ def load_user(user_id):
     return User.query.get(user_id)
 
 
-@app.route('/')
+
 @app.route('/login', methods=['GET','POST'])
 def login():
     login_form = LoginForm()
@@ -86,7 +86,7 @@ def login():
 
 
 
-# @app.route('/')
+@app.route('/')
 @app.route('/home')
 @login_required
 def home():
@@ -178,11 +178,11 @@ def unauthorized():
 #             return render_template('login.html', registration_form=registration_form)
 
 
-# @app.route('/logout', methods=['GET', 'POST'])
-# @login_required
-# def logout():
-#     logout_user()
-#     return redirect(url_for('home'))
+@app.route('/logout', methods=['GET', 'POST'])
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for('login'))
 
 # @app.after_request
 # def redirect_to_signin(response):

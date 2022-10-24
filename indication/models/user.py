@@ -6,8 +6,8 @@ from werkzeug.security import generate_password_hash, check_password_hash
 class User(UserMixin, db.Model):
     __tablename__ = 'user'
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(32), unique=True)
-    email = db.Column(db.String(64), unique=True)
+    username = db.Column(db.String(32))
+    email = db.Column(db.String(64))
     password_hash = db.Column(db.String(64))
     joined_at = db.Column(db.DateTime, default=datetime.utcnow)
 

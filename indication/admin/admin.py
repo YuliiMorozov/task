@@ -1,53 +1,14 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash, session
+# from flask import render_template
+# from flask_admin import Admin
+# from flask_admin.contrib.sqla import ModelView
+# from indication import app, db
+# from models import House, Flat
 
 
-# 'admin' - is the name of the Blueprint, which will be a suffix to all method names of this module
-admin = Blueprint('admin', __name__, template_folder='templates', static_folder='static')
+# # @app.get('/admin')
+# # def admin():
+# #     return render_template('./admin.html')
 
-
-def login_admin():
-    session['admin_logged'] = 1
-
-
-def isLogged():
-    return True if session.get('admin_logged') else False
-
-def logout_admin():
-    session.pop('admin_logged', None)
-
-
-menu = [{'url': '.index', 'title': 'Panel'},
-        {'url': '.logout', 'title': 'Exit'}]
-
-
-@admin.route('/')
-def index():
-    if not isLogged():
-        return redirect(url_for('.index'))
-
-    return render_template('admin/index.html', menu=menu, title="ADMIN")
-
-@admin.route('/login', methods=["POST", "GET"])
-def login():
-    if isLogged():
-        return redirect(url_for('.index'))
-
-
-    if request.method == "POST":
-        if request.form['user'] == "admin" and request.form['psw'] == "admin":
-            login_admin()
-            return redirect(url_for('.index'))
-        else:
-            flash("Error user or password", "error")
-    
-    return render_template('admin/login.html', title="ADMIN")
-
-
-@admin.route('/logout', methods=["POST", "GET"])
-def logout():
-    if not isLogged():
-        return redirect(url_for('.login'))
-    
-    logout_admin()
-
-    return redirect(url_for('.login'))
+# admin = Admin(app, name='Create house & flat', template_mode='bootstrap3')
+# admin.add_view(ModelView(House, db.session, name='Add house number'))
+# admin.add_view(ModelView(Flat, db.session, name='Add flat number'))

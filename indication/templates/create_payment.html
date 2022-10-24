@@ -11,7 +11,7 @@ Submit meter readings
 <form action="{{ url_for('create_payment') }}" method="POST">
     {{ template_form.hidden_tag() }}
     {{ template_form.house.label }}<br>
-    {{ template_form.house() }}<br>
+    {{ template_form.house()}}<br>
     <br>    
     {{ template_form.flat.label }}<br>
     {{ template_form.flat() }}<br>
@@ -27,9 +27,22 @@ Submit meter readings
     <br>
     {{ template_form.submit() }}
 </form>
+<script>
+    house_select = document.getElementById('house');
+    flat_select = document.getElementById('flat');
 
-
-
-
+    house_select.onchange = function() {
+        house = house_select.value;
+        fetch('flat/' + house).then(function(response) {
+            response.json().then(function(data) {
+                optionHTML = '';
+                for (flat of data.flathouse) {
+                    optionHTML += '<option value="' + flat.id + '">' + flat.flat_number + '</option>'
+                }
+                flat_select.innerHTML = optionHTML;
+            });
+        });
+    }
+</script>
 
 {% endblock %}

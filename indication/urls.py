@@ -1,52 +1,54 @@
 from importlib.resources import read_text
-from flask import render_template, request, redirect, url_for, flash
-from indication import app, db
+from flask import render_template, request, redirect, url_for, flash, jsonify, request, make_response
+from indication import app, db, login_manager
 from .controllers import create_data, pay_information, water_information, gas_information, electricity_information, to_pay
 from .forms import LoginForm, RegistrationForm
 from indication.models.user import *
+from indication.models.flat import *
+from indication.models.house import *
 
-from flask_login import LoginManager, login_required, login_user, current_user, logout_user
-from werkzeug.security import generate_password_hash, check_password_hash
+from flask_login import current_user, login_required, login_user, logout_user
+# from werkzeug.security import generate_password_hash, check_password_hash
 
-# create login manager
-login_manager = LoginManager()
-login_manager.init_app(app)
+from flask_admin import Admin
+from flask_admin.contrib.sqla import ModelView
+
+# @app.get('/admin')
+# def admin():
+#     return render_template('admin.html')
+
+admin = Admin(app, name='Create house & flat', template_mode='bootstrap3')
+admin.add_view(ModelView(House, db.session, name='Add house number'))
+admin.add_view(ModelView(Flat, db.session, name='Add flat number'))
+
+
+
 
 @app.route('/registration', methods=["GET", "POST"])
 def registration():
+
+    if current_user.is_authenticated:
+        return redirect(url_for('home'))
+        
     registration_form = RegistrationForm()
-    if request.method == "POST":
 
-        username = request.form['username']
-        email = request.form['email']
-                 
-        user = User.query.filter_by(username=username, email=email).first()    
-        if user is None:
-            user = User(username=username, email=email)   
-            user.set_password(registration_form.password.data)     
+    if registration_form.validate_on_submit():
+
+        user = User(username=registration_form.username.data, email=registration_form.email.data)
+        user.set_password(registration_form.password.data)
+
+        user_check_in_db = User.query.filter_by(username=request.form['username']).first()
+        email_check_in_db = User.query.filter_by(email=request.form['email']).first()  
+          
+        if user_check_in_db is None and email_check_in_db is None:
             db.session.add(user)
-        try:            
             db.session.commit()
-            return redirect('/login')
-        except:
-            return "Error! Make sure the forms are filled out correctly."
-    else:
-        return render_template("registration.html",
-                                registration_form=registration_form)
+            return redirect(url_for('login'))
+        else:
+            flash('This user or email is already registered') 
+            return redirect(url_for('registration'))        
+    return render_template("registration.html", title='Register', registration_form=registration_form)
 
-
-
-
-    # if registration_form.validate_on_submit():
-    #     username = request.form['username']
-    #     email = request.form['email']
-    #     user = User.query.filter_by(username=username, email=email).first()
-    #     if user is None:
-    #         user = User(username=registration_form.username.data, email=registration_form.email.data)
-    #         user.set_password(registration_form.password.data)
-    #         db.session.add(user)
-    #         db.session.commit()
-    # return render_template('registration.html', registration_form=registration_form)
 
 
 
@@ -56,12 +58,16 @@ def load_user(user_id):
     return User.query.get(user_id)
 
 
-
 @app.route('/login', methods=['GET','POST'])
 def login():
+
+    # error = None
+    if current_user.is_authenticated:
+        return redirect(url_for('home'))
+
     login_form = LoginForm()
     if login_form.validate_on_submit():
-
+        
         user = User.query.filter_by(email=login_form.email.data).first()
 
         if user and user.check_password(login_form.password.data):
@@ -70,14 +76,9 @@ def login():
             next_page = request.args.get('next')
             return redirect(next_page) if next_page else redirect(url_for('home'))
         else:
+            # flash('Invalid credentials', 'error')
             return redirect(url_for('login'))
     return render_template('login.html', login_form=login_form)
-
-
-
-
-
-
 
 
 
@@ -130,52 +131,6 @@ def unauthorized():
 
 
 
-# @app.route('/login', methods=['GET', 'POST'])
-# def login():
-#     login_form = LoginForm()
-#     login = request.form.get('login')
-#     password = request.form.get('password')
-
-#     if login and password:
-#         user = User.query.filter_by(login=login).first()
-        
-#         if check_password_hash(user.password, password):
-#             login_user(user)
-
-#             next_page = request.arg.get('next')
-
-#             redirect(next_page)
-#         else:
-#             flash('Login or password is not correct')
-
-#     else:
-#         flash('Please fill login and password fields')
-
-#         return render_template('login.html', login_form=login_form)
-
-
-# @app.route('/registration', methods=['GET', 'POST'])
-# def registration():
-
-#     registration_form = RegistrationForm()
-#     login = request.form.get('login')
-#     password = request.form.get('password')
-#     password2 = request.form.get('password2')
-
-#     if request.method == 'POST':
-#         if not (login or password or password2):
-#             flash('Please, fill all fields!')
-#         elif password != password2:
-#             flash('Passwords are not equal!')
-#         else:
-#             hash_psw = generate_password_hash(password)
-#             user = User(login=login, password=hash_psw)
-#             db.session.add(user)
-#             db.session.commit()
-
-#             return redirect(url_for('login'))
-
-#             return render_template('login.html', registration_form=registration_form)
 
 
 @app.route('/logout', methods=['GET', 'POST'])
@@ -183,6 +138,8 @@ def unauthorized():
 def logout():
     logout_user()
     return redirect(url_for('login'))
+
+
 
 # @app.after_request
 # def redirect_to_signin(response):
@@ -194,16 +151,14 @@ def logout():
 
 
 
-# login loader
-# @app.route('/login', methods=['GET', 'POST'])
-# def login():
-#     login_form = LoginForm()
-#     if login_form.validate_on_submit():        
-#         user = User.query.filter_by(email=login_form.email.data).first()
-#         if user and user.check_password(login_form.password.data):
-#             login_user(user, remember=login_form.remember.data)
-#             next_page = request.args.get('next')
-#             return redirect(next_page) if next_page else redirect(url_for('home', _external=True, _scheme='https'))
-#         else:
-#             return redirect(url_for('login', _external=True, _scheme='https'))
-#     return render_template('login.html', login_form=login_form)
+# create a json 
+@app.route('/flat/<get_flat>')
+def flatbyhouse(get_flat):
+    flat = Flat.query.filter_by(house_id=get_flat).all()
+    flatArray = []
+    for item in flat:
+        flatObj = {}
+        flatObj['id'] = item.id
+        flatObj['flat_number'] = item.flat_number
+        flatArray.append(flatObj)
+    return jsonify({'flathouse' : flatArray})

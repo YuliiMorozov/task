@@ -7,6 +7,9 @@ from indication.models import House, Flat, Invoice, WaterInvoice, GasInvoice, El
 def create_data():
 
     form_general = FormGeneral()
+    form_general.house.choices = [(house.id, house.house_number) for house in House.query.all()]
+    form_general.flat.choices = [(flat.id, flat.flat_number) for flat in Flat.query.filter_by(house_id=House.flats).all()]
+
     if request.method == "POST":
 
         house_number = request.form['house']
@@ -14,7 +17,6 @@ def create_data():
         count_water = request.form['water']
         count_gas = request.form['gas']
         count_electricity = request.form['electricity']
-
          
         house = House.query.filter_by(house_number=house_number).first()    
         if house is None:

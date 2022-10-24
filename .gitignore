@@ -16,3 +16,5 @@ models.py
 launch.json
 views.py
 dab.db
+admin/
+task.md

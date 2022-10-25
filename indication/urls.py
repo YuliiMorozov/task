@@ -1,11 +1,22 @@
 from importlib.resources import read_text
 from flask import render_template, request, redirect, url_for, flash, jsonify, request, make_response
 from indication import app, db, login_manager
-from .controllers import create_data, pay_information, water_information, gas_information, electricity_information, to_pay
-from .forms import LoginForm, RegistrationForm
+import indication
+from .controllers import create_data, pay_information, water_information, gas_information, electricity_information, to_pay, create_registration, create_login
 from indication.models.user import *
 from indication.models.flat import *
 from indication.models.house import *
+import jwt
+import datetime
+from indication.forms import LoginForm
+from flask_jwt_extended import create_access_token
+from flask_jwt_extended import get_jwt_identity
+from flask_jwt_extended import jwt_required
+from flask_jwt_extended import JWTManager
+
+app.config["JWT_SECRET_KEY"] = "super-secret"  # Change this!
+jwt = JWTManager(app)
+
 
 from flask_login import current_user, login_required, login_user, logout_user
 # from werkzeug.security import generate_password_hash, check_password_hash
@@ -22,70 +33,88 @@ admin.add_view(ModelView(House, db.session, name='Add house number'))
 admin.add_view(ModelView(Flat, db.session, name='Add flat number'))
 
 
+@app.route("/apiapi/login", methods=["POST"])
+def login_test():
+    username = request.json.get("username", None)   
+    password = request.json.get("password", None)   
+    user = User.query.filter_by(username=username).first()
+
+    if user is None:
+        return jsonify({"msg": "Bad username or password"}), 401
+
+    if username != user.username or user.check_password(password) is False:
+        return jsonify({"msg": "Bad username or password"}), 401
+
+    access_token = create_access_token(identity=username)
+    return jsonify(access_token=access_token)
 
 
-@app.route('/registration', methods=["GET", "POST"])
+
+# @app.route('/api/login', methods=['GET','POST'])
+# def login_api():
+#     login_form = LoginForm()
+    # print(login_form.email.data)
+    # print(request.json)
+    # print(request.headers)
+    # print(request.query_string)
+    # auth = request.headers.authorization
+    # print(auth)
+
+    # if not auth or not auth.username or not auth.password:
+    #     return make_response('Could not verify', 401, {'WWW-Authenticate' : 'Basic realm="Login required"'})
+    # if request.method == "POST":
+    #     print("email&password!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+    #     email = request.form['email']        
+    #     password = request.form['password']   
+
+    #     user = User.query.filter_by(username=auth.username).first()
+    #     user = User.query.filter_by(email=email).first()
+    #     print(request.form)
+    #     print("UUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUSEEEEEEEEEEEEEEEEEEEEEEEEEEERRRR")
+    #     print(user)
+    # # if not user:
+    #     return make_response('Could not verify', 401, {'WWW-Authenticate' : 'Basic realm="Login required"'})
+
+    # if check_password_hash(user.password, auth.password):
+    #     token = jwt.encode({'email' : user.email, 'exp' : datetime.datetime.utcnow() + datetime.timedelta(minutes=30)}, app.config['SECRET_KEY'])
+
+    #     return jsonify({'token' : token.decode('UTF-8')})
+    
+    # return make_response('Could not verify', 401, {'WWW-Authenticate' : 'Basic realm="Login required"'})
+
+
+# @app.route("/login", methods=["POST"])
+# def login():
+#     username = request.json.get("username", None)
+#     password = request.json.get("password", None)
+
+#     user = User.query.filter_by(username=username).one_or_none()
+#     if not user or not user.check_password(password):
+#         return jsonify("Wrong username or password"), 401
+
+#     # Notice that we are passing in the actual sqlalchemy user object here
+#     access_token = create_access_token(identity=user)
+#     return jsonify(access_token=access_token)
+
+
+
+
+
+
+
+
+@app.route('/registration', methods=["POST"])
 def registration():
-
-    if current_user.is_authenticated:
-        return redirect(url_for('home'))
-        
-    registration_form = RegistrationForm()
-
-    if registration_form.validate_on_submit():
-
-        user = User(username=registration_form.username.data, email=registration_form.email.data)
-        user.set_password(registration_form.password.data)
-
-        user_check_in_db = User.query.filter_by(username=request.form['username']).first()
-        email_check_in_db = User.query.filter_by(email=request.form['email']).first()  
-          
-        if user_check_in_db is None and email_check_in_db is None:
-            db.session.add(user)
-            db.session.commit()
-            return redirect(url_for('login'))
-        else:
-            flash('This user or email is already registered') 
-            return redirect(url_for('registration'))        
-    return render_template("registration.html", title='Register', registration_form=registration_form)
-
-
-
+    return create_registration()
 
 # user loader
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(user_id)
 
-
 @app.route('/login', methods=['GET','POST'])
 def login():
-
-    # error = None
-    if current_user.is_authenticated:
-        return redirect(url_for('home'))
-
-    login_form = LoginForm()
-    if login_form.validate_on_submit():
-        
-        user = User.query.filter_by(email=login_form.email.data).first()
-
-        if user and user.check_password(login_form.password.data):
-
-            login_user(user, remember=login_form.remember.data)
-            next_page = request.args.get('next')
-            return redirect(next_page) if next_page else redirect(url_for('home'))
-        else:
-            # flash('Invalid credentials', 'error')
-            return redirect(url_for('login'))
-    return render_template('login.html', login_form=login_form)
-
-
-
-
-
-
-
+    return create_login()
 
 @app.route('/')
 @app.route('/home')
@@ -94,7 +123,7 @@ def home():
     return render_template("index.html")
 
 @app.route('/create_payment', methods=["GET", "POST"])
-@login_required
+# @login_required
 def create_payment():
     return create_data()    
 
@@ -129,17 +158,11 @@ def about():
 def unauthorized():
     return redirect(url_for('login'))
 
-
-
-
-
 @app.route('/logout', methods=['GET', 'POST'])
 @login_required
 def logout():
     logout_user()
     return redirect(url_for('login'))
-
-
 
 # @app.after_request
 # def redirect_to_signin(response):
@@ -148,13 +171,10 @@ def logout():
 
 #     return response
 
-
-
-
 # create a json 
-@app.route('/flat/<get_flat>')
-def flatbyhouse(get_flat):
-    flat = Flat.query.filter_by(house_id=get_flat).all()
+@app.route('/flat/<house_id>')
+def flatbyhouse(house_id):
+    flat = Flat.query.filter_by(house_id=house_id).all()
     flatArray = []
     for item in flat:
         flatObj = {}

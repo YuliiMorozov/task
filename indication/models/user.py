@@ -9,6 +9,7 @@ class User(UserMixin, db.Model):
     username = db.Column(db.String(32))
     email = db.Column(db.String(64))
     password_hash = db.Column(db.String(64))
+    # password = db.Column(db.String(64))
     joined_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     def __repr__(self):

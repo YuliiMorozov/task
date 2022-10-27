@@ -198,7 +198,7 @@ def user(username_id):
 
 
 
-@app.route('/registration', methods=["POST"])
+@app.route('/registration', methods=["GET", "POST"])
 def registration():
     return create_registration()
 

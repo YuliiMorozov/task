@@ -2,21 +2,58 @@ from importlib.resources import read_text
 from flask import render_template, request, redirect, url_for, flash, jsonify, request, make_response
 from indication import app, db, login_manager
 import indication
+# from indication.middleware.check_token import Middleware
+# from indication.middleware.check_token import Middleware
 from .controllers import create_data, pay_information, water_information, gas_information, electricity_information, to_pay, create_registration, create_login
 from indication.models.user import *
 from indication.models.flat import *
 from indication.models.house import *
-import jwt
+
 import datetime
 from indication.forms import LoginForm
+import jwt
 from flask_jwt_extended import create_access_token
+
 from flask_jwt_extended import get_jwt_identity
 from flask_jwt_extended import jwt_required
 from flask_jwt_extended import JWTManager
+import re
 
 app.config["JWT_SECRET_KEY"] = "super-secret"  # Change this!
-jwt = JWTManager(app)
+# jwt = JWTManager(app)
 
+# from indication.middleware.check_token import Middleware
+# from werkzeug.wrappers import Request, Response
+
+
+# class Middleware():
+#     def __init__(self, app):
+#         print('init')
+#         self.app = app
+#         self.username = 'TestUser'
+#         self.password = 'TestPass'
+
+#     def __call__(self, environ, start_response):
+#         print("aaaa")
+#         request = Request(environ)
+#         username = request.authorization['username']
+#         password = request.authorization['password']
+
+#         if username == self.username and password == self.password:
+#             environ['user'] = {
+#                 'name': 'Test User'
+#             }
+
+#             return self.app(environ, start_response)
+
+#         res = Response('Authorization failed', mimetype='text/plain', status=401)
+#         return res(environ, start_response)
+
+# app.wsgi_app = Middleware(app.wsgi_app)
+
+
+
+# app.wsgi_app = Middleware(app.wsgi_app)
 
 from flask_login import current_user, login_required, login_user, logout_user
 # from werkzeug.security import generate_password_hash, check_password_hash
@@ -33,69 +70,127 @@ admin.add_view(ModelView(House, db.session, name='Add house number'))
 admin.add_view(ModelView(Flat, db.session, name='Add flat number'))
 
 
-@app.route("/apiapi/login", methods=["POST"])
+@app.route("/api/login", methods=["POST"])
 def login_test():
     username = request.json.get("username", None)   
     password = request.json.get("password", None)   
     user = User.query.filter_by(username=username).first()
-
+    
     if user is None:
-        return jsonify({"msg": "Bad username or password"}), 401
+        return jsonify({"msg": "Bad username or password"}), 400
 
     if username != user.username or user.check_password(password) is False:
-        return jsonify({"msg": "Bad username or password"}), 401
-
-    access_token = create_access_token(identity=username)
+        return jsonify({"msg": "Bad username or password"}), 400
+        
+    access_token = jwt.encode({"username": username}, app.config["SECRET_KEY"], algorithm="HS256")
     return jsonify(access_token=access_token)
 
 
 
-# @app.route('/api/login', methods=['GET','POST'])
-# def login_api():
-#     login_form = LoginForm()
-    # print(login_form.email.data)
-    # print(request.json)
-    # print(request.headers)
-    # print(request.query_string)
-    # auth = request.headers.authorization
-    # print(auth)
+@app.route("/api/registration", methods=["POST"])
+def api_registration():
+    username = request.json.get("username")
+    email = request.json.get("email")
+    password = request.json.get("password")
+    password2 = request.json.get("password2")   
 
-    # if not auth or not auth.username or not auth.password:
-    #     return make_response('Could not verify', 401, {'WWW-Authenticate' : 'Basic realm="Login required"'})
-    # if request.method == "POST":
-    #     print("email&password!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-    #     email = request.form['email']        
-    #     password = request.form['password']   
+    newUsername = User.query.filter_by(username=username).first()
+    newEmail = User.query.filter_by(email=email).first()
 
-    #     user = User.query.filter_by(username=auth.username).first()
-    #     user = User.query.filter_by(email=email).first()
-    #     print(request.form)
-    #     print("UUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUSEEEEEEEEEEEEEEEEEEEEEEEEEEERRRR")
-    #     print(user)
-    # # if not user:
-    #     return make_response('Could not verify', 401, {'WWW-Authenticate' : 'Basic realm="Login required"'})
+    regexForEmail = '[A-Za-z0-9._-]+@[a-z.-]+.[A-Z|a-z]'
+    regexForPassword = '[A-Z]+[a-z]+[0-9]+.+.+.+.'
 
-    # if check_password_hash(user.password, auth.password):
-    #     token = jwt.encode({'email' : user.email, 'exp' : datetime.datetime.utcnow() + datetime.timedelta(minutes=30)}, app.config['SECRET_KEY'])
+    # check username
+    if len(username) < 4 or len(username) > 25:
+        return jsonify({"msg": "Name of username is short"}), 400
 
-    #     return jsonify({'token' : token.decode('UTF-8')})
-    
-    # return make_response('Could not verify', 401, {'WWW-Authenticate' : 'Basic realm="Login required"'})
+    elif newUsername:
+        return jsonify({"msg": "User with this username already exists"}), 400
+
+    # check email
+    # need create func to check email addres
+    elif bool(re.fullmatch(regexForEmail, email)) is False:
+        return jsonify({"msg": "Please enter a valid email"}), 400
+
+    elif newEmail:
+        return jsonify({"msg": "This email has already used"}), 400
 
 
-# @app.route("/login", methods=["POST"])
-# def login():
-#     username = request.json.get("username", None)
-#     password = request.json.get("password", None)
+    # check password
+    # need create func to check password
+    elif bool(re.fullmatch(regexForPassword, password)) is False:
+        return jsonify({"msg": "Please enter a valid password"}), 400
 
-#     user = User.query.filter_by(username=username).one_or_none()
-#     if not user or not user.check_password(password):
-#         return jsonify("Wrong username or password"), 401
+    elif password2 != password:
+        return jsonify({"msg": "Please repeat the password correctly"}), 400
 
-#     # Notice that we are passing in the actual sqlalchemy user object here
-#     access_token = create_access_token(identity=user)
-#     return jsonify(access_token=access_token)
+    else:
+        return jsonify({"msg": "Welcome to website"}), 200
 
+
+
+
+
+    # regexForEmail = '[A-Za-z0-9._-]+@[a-z.-]+.[A-Z|a-z]'
+    # regexForPassword = '[A-Z]+[a-z]+[0-9]+.+.+.+.'
+
+    # # check username
+    # if len(username) < 4 or len(username) > 25:
+    #     return jsonify({"msg": "Name of username is short"}), 400
+
+    # elif newUsername:
+    #     return jsonify({"msg": "User with this username already exists"}), 400
+
+    # else:
+    #     return jsonify({"msg": "This username is free"}), 200
+
+    # # check email
+    # # need create func to check email addres
+    # if bool(re.fullmatch(regexForEmail, email)) is False:
+    #     return jsonify({"msg": "Please enter a valid email"}), 400
+
+    # elif newEmail:
+    #     return jsonify({"msg": "This email has already used"}), 400
+
+    # else:
+    #     return jsonify({"msg": "This email is suitable for registration"}), 200
+
+    # # check password
+    # # need create func to check password
+    # if bool(re.fullmatch(regexForPassword, password)) is False:
+    #     return jsonify({"msg": "Please enter a valid password"}), 400
+
+    # elif password2 != password:
+    #     return jsonify({"msg": "Please repeat the password correctly"}), 400
+
+    # else:
+    #     return jsonify({"msg": "Good password"}), 200
+
+
+
+@app.route("/api/home", methods=["GET"])
+def api_home():
+
+    username = "Yulii"
+    return jsonify({"msg": "Welcome to home page, " + username}), 200
+
+
+
+
+
+@app.route('/api/<username_id>')
+def user(username_id):
+    user = User.query.filter_by(id=username_id).all()
+    userArray = []
+    for item in user:
+        userObj = {}
+        userObj['id'] = item.id
+        userObj['username'] = item.username
+        userObj['email'] = item.email
+        userObj['password_hash'] = item.password_hash
+        userObj['joined_at'] = item.joined_at
+        userArray.append(userObj)
+    return jsonify({'USERS' : userArray})
 
 
 
@@ -118,7 +213,7 @@ def login():
 
 @app.route('/')
 @app.route('/home')
-@login_required
+# @login_required
 def home():
     return render_template("index.html")
 

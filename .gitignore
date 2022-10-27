@@ -18,3 +18,4 @@ views.py
 dab.db
 admin/
 task.md
+regex.py

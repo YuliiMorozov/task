@@ -8,5 +8,5 @@ class WaterInvoice(db.Model):
     water_invoices_id = db.Column(db.Integer, db.ForeignKey('invoice.id'))
 
     # invoices = db.relationship('Invoice', backref='water_invoice', lazy='dynamic')
-    # new
+
     flat_id = db.Column(db.Integer, db.ForeignKey('flat.id'))

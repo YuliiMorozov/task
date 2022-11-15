@@ -1,0 +1,1 @@
+# all payment links are in the payment_routes directory

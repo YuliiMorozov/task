@@ -19,3 +19,4 @@ dab.db
 admin/
 task.md
 regex.py
+migrations/

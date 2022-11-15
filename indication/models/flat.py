@@ -13,5 +13,5 @@ class Flat(db.Model):
     gas_invoices = db.relationship('GasInvoice', backref='flat', lazy='dynamic')
     electricity_invoices = db.relationship('ElectricityInvoice', backref='flat', lazy='dynamic')
 
-    # def __repr__(self):
-        # return f"<flat {self.id}>"
+    def __repr__(self):
+        return f"<flat {self.id}>"
